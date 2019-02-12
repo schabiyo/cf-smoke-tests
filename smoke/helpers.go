@@ -12,6 +12,10 @@ import (
 const (
 	SimpleRubyAppBitsPath   = "../../assets/ruby_simple"
 	SimpleDotnetAppBitsPath = "../../assets/dotnet_simple/Published"
+	MssqlDotnetAppBitsPath  = "../../assets/dotnet_mssql/Published"
+	SCCJavaAppBitsPath      = "../../assets/java_scc"
+	SimpleJavaAppBitsPath   = "../../assets/java_simple"
+	JavaSCCAppBitsPath      = "../../assets/java_scc"
 )
 
 func SkipIfNotWindows(testConfig *Config) {

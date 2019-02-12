@@ -24,6 +24,9 @@ type Config struct {
 	Org   string `json:"org"`
 	Space string `json:"space"`
 
+	EnableSCCTests      bool `json:"enable_scc_tests"`
+	EnableAzureSQLTests bool `json:"enable_azuresql_tests"`
+
 	UseExistingOrg   bool `json:"use_existing_org"`
 	UseExistingSpace bool `json:"use_existing_space"`
 
@@ -169,6 +172,10 @@ func (c *Config) GetAppStatusTimeout() time.Duration {
 
 func (c *Config) GetWindowsStack() string {
 	return c.WindowsStack
+}
+
+func (c *Config) GetServiceCreateTimeout() time.Duration {
+	return 300 * time.Second
 }
 
 // singleton cache

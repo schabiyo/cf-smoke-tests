@@ -18,11 +18,13 @@ reveal fundamental problems with the system.
 There are three tests in this suite, all of which are pretty simple:
 1. `runtime`: Pushes an app and validates that HTTP requests are properly routed to the app.
 2. `logging`: Pushes an app and validates that logs can be fetched for the app.
-3. `isolation_segments`: Entitles an org to an isolation segment and pushes two apps,
-  one to the isolation segment, and one to the shared segment.
+3. `isolation_segments`: Entitles an org to an isolation segment and pushes two apps, one to the isolation segment, and one to the shared segment.
   The test validates that isolated apps are only accessed via the isolated router,
   and that apps on the shared segment are only accessed via the shared router.
+4. `SCS`: Test Spring Config server is properly configured
+5. `MSSQL`: Test that Azure DB is properly configured
 
+  
 They are not intended to test more sophisticated functionality of Cloud Foundry
 or to test administrator operations. The [CF Acceptance
 Tests](https://github.com/cloudfoundry/cf-acceptance-tests) do perform this
@@ -66,11 +68,20 @@ Below is an example `integration_config.json`:
   "cleanup"                         : true,
   "logging_app"                     : "",
   "runtime_app"                     : "",
-  "enable_windows_tests"            : false,
+  "enable_scc_tests"                : true,
+  "scc_git_uri"                     : "true",
+  "scc_git_branch"                  : "branch",
+  "enable_azuresql_tests"           : true,
+  "enable_windows_tests"            : true,
   "windows_stack"                   : "windows2012R2",
+  "org"                             : "SANDBOX",
+  "space"                           : "chabisa",
+  "use_existing_org"                : true,
+  "use_existing_space"              : true,
+  "artifacts_directory"             : "/tmp/smoke-artifacts",
   "isolation_segment_name"          : "is1",
   "isolation_segment_domain"        : "is1.bosh-lite.com",
-  "enable_isolation_segment_tests"  : true
+  "enable_isolation_segment_tests"  : false
 }
 ```
 The following are special case configurations.
