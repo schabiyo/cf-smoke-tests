@@ -24,13 +24,20 @@ type Config struct {
 	Org   string `json:"org"`
 	Space string `json:"space"`
 
-	EnableSCCTests      bool `json:"enable_scc_tests"`
-	EnableAzureSQLTests bool `json:"enable_azuresql_tests"`
+	EnableSSOTests      bool   `json:"enable_sso_tests"`
+	EnableSCCTests      bool   `json:"enable_scc_tests"`
+	GitUri              string `json:"scc_git_uri"`
+	GitBranch           string `json:"scc_git_branch"`
+	EnableAzureSQLTests bool   `json:"enable_azuresql_tests"`
 
 	UseExistingOrg   bool `json:"use_existing_org"`
 	UseExistingSpace bool `json:"use_existing_space"`
 
 	UseLogCache bool `json:"use_log_cache"`
+
+	// existing aservices names - if empty the space will be managed and a random app name will be used
+	SCCService     string `json:"scc_src"`
+	AzureDBService string `json:"azuredb_src"`
 
 	// existing app names - if empty the space will be managed and a random app name will be used
 	LoggingApp string `json:"logging_app"`
@@ -48,6 +55,10 @@ type Config struct {
 	IsolationSegmentName   string   `json:"isolation_segment_name"`
 	IsolationSegmentDomain string   `json:"isolation_segment_domain"`
 	IsolationSegmentSpace  string   `json:"isolation_segment_space"`
+}
+
+func (c *Config) GetEnableIsolationSegmentTests() bool {
+	return c.EnableIsolationSegmentTests
 }
 
 func (c *Config) GetIsolationSegmentName() string {
@@ -174,8 +185,27 @@ func (c *Config) GetWindowsStack() string {
 	return c.WindowsStack
 }
 
+func (c *Config) GetGitUri() string {
+	return c.GitUri
+}
+
+func (c *Config) GetGitBranch() string {
+	return c.GitBranch
+}
 func (c *Config) GetServiceCreateTimeout() time.Duration {
-	return 300 * time.Second
+	return 600 * time.Second
+}
+
+func (c *Config) GetEnableSSOTests() bool {
+	return c.EnableSSOTests
+}
+
+func (c *Config) GetEnableAzureDBTests() bool {
+	return c.EnableAzureSQLTests
+}
+
+func (c *Config) GetEnableSCCTests() bool {
+	return c.EnableSCCTests
 }
 
 // singleton cache

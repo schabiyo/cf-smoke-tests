@@ -14,8 +14,8 @@ const (
 	SimpleDotnetAppBitsPath = "../../assets/dotnet_simple/Published"
 	MssqlDotnetAppBitsPath  = "../../assets/dotnet_mssql/Published"
 	SCCJavaAppBitsPath      = "../../assets/java_scc"
+	SSOJavaAppBitsPath      = "../../assets/java_sso"
 	SimpleJavaAppBitsPath   = "../../assets/java_simple"
-	JavaSCCAppBitsPath      = "../../assets/java_scc"
 )
 
 func SkipIfNotWindows(testConfig *Config) {
