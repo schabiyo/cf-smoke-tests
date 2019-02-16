@@ -1,0 +1,23 @@
+---
+applications:
+ - name: authcode-sample
+   memory: 1G
+   instances: 1
+   path: build/libs/authcode.jar
+   buildpack: java_buildpack_offline
+   services:
+   - syo-sso-dev
+   env:
+     SKIP_SSL_VALIDATION: "true"
+     # The location of the deployed resource server sample application
+     RESOURCE_URL: https://p-identity.sys.sea.preview.pcf.manulife.com/dashboard/identity-zones/534816fc-00a3-485a-924c-5e6e06e26fbf/instances/8681c7be-2598-40d3-ac23-faabbfd2bb10/
+     # Grant type to be set for the application's UAA client configurations. Only one grant type per application is supported by the SSO service.
+     GRANT_TYPE: authorization_code
+     # Identity provider(s) to be set for the application's client configurations
+     SSO_IDENTITY_PROVIDERS: manulife-adfs-dev
+     # Client scope(s) for the application, not used for client credentials grant type
+     SSO_SCOPES: openid, todo.read, todo.write
+     # Resource(s) that the application will use as scopes/authorities to be created if they do not already exist during bootstrapping
+     SSO_RESOURCES: |
+       todo.read:  Read Objects
+       todo.write: Write Objects

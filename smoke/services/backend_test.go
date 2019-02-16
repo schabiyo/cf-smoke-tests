@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -64,7 +63,7 @@ var _ = Describe("BackendServices:", func() {
 				if testConfig.GetEnableAzureDBTests() {
 					Expect(cf.Cf("delete-service", azureDBServiceName, "-f").Wait(testConfig.GetDefaultTimeout())).To(Exit(0))
 				}
-				if testConfig.GetEnableSSOTests() {
+				if testConfig.GetEnableSSOAuthCodeTests() {
 					Expect(cf.Cf("delete-service", ssoServiceName, "-f").Wait(testConfig.GetDefaultTimeout())).To(Exit(0))
 				}
 			}
@@ -81,7 +80,6 @@ var _ = Describe("BackendServices:", func() {
 				services := cf.Cf("service", sccServiceName).Wait(testConfig.GetPushTimeout())
 				servicesOutput := string(services.Out.Contents())
 				if strings.Contains(servicesOutput, "succeeded") {
-					fmt.Println("Config Server created successfully")
 					break
 				}
 				time.Sleep(10 * time.Second)
@@ -94,8 +92,8 @@ var _ = Describe("BackendServices:", func() {
 			Expect(cf.Cf("bind-service", appName, sccServiceName, testConfig.AppsDomain).Wait(testConfig.GetPushTimeout())).To(Exit(0))
 			//Start the app
 			Expect(cf.Cf("restart", appName).Wait(testConfig.GetPushTimeout())).To(Exit(0))
-			// Write and read the same value
-			runPushTests(appName, appURL, sccServiceName, "Awesome!! Config successfully read from Git", expectedNullResponse, testConfig)
+			// Hit the restaurant endpoint
+			runPushTests(appName, appURL+"/restaurant", sccServiceName, "Awesome!! Config successfully read from Git", expectedNullResponse, testConfig)
 		})
 	})
 
@@ -108,27 +106,44 @@ var _ = Describe("BackendServices:", func() {
 		It("can be created, used and deleted", func() {
 			smoke.SkipIfNotWindows(testConfig)
 			// Create the service
-			Expect(cf.Cf("create-service", "azure-sqldb", "basic", azureDBServiceName).Wait(testConfig.GetServiceCreateTimeout())).To(Exit(0))
+			Expect(cf.Cf("create-service", "azure-sqldb", "basic", azureDBServiceName, "-c", smoke.MssqlDotnetAppBitsPath+"/sqldb-config.json").Wait(testConfig.GetServiceCreateTimeout())).To(Exit(0))
 			// Push the app
 			//Expect(cf.Cf("push", appName, "-p", smoke.SimpleDotnetAppBitsPath, "-d", testConfig.AppsDomain, "-s", testConfig.GetWindowsStack(), "-b", "hwc_buildpack").Wait(testConfig.GetPushTimeout())).To(Exit(0))
 
 			//runPushTests(appName, appURL, "Azure DB rocks!", expectedNullResponse, testConfig)
 		})
 	})
-	Context("SSO service", func() {
+	Context("SSO service -- Authentication Code", func() {
 		BeforeEach(func() {
-			if testConfig.GetEnableSSOTests() != true {
+			if testConfig.GetEnableSSOAuthCodeTests() != true {
 				Skip("Skipping because EnableSSOTests flag is set to false")
+			}
+		})
+		//Auth code and client credential will be tested
+		It("is working as expected", func() {
+			//smoke.SkipIfNotWindows(testConfig)
+			// Create the UAA service
+			Expect(cf.Cf("create-service", "p-identity", testConfig.GetSSOPlan(), ssoServiceName).Wait(testConfig.GetServiceCreateTimeout())).To(Exit(0))
+			// Push the app
+			//Expect(cf.Cf("push", appName, "-p", smoke.SimpleDotnetAppBitsPath, "-d", testConfig.AppsDomain, "-s", testConfig.GetWindowsStack(), "-b", "hwc_buildpack").Wait(testConfig.GetPushTimeout())).To(Exit(0))
+			//runPushTests(appName, appURL, "auth_time", expectedNullResponse, testConfig)
+		})
+	})
+
+	Context("SSO service -- Client Credential ", func() {
+		BeforeEach(func() {
+			if testConfig.GetEnableSSOClientCredTests() != true {
+				Skip("Skipping because EnableSSOClientCredTests flag is set to false")
 			}
 		})
 		//Auth code and client credential will be tested
 		It("can be created, used and deleted", func() {
 			//smoke.SkipIfNotWindows(testConfig)
 			// Create the UAA service
-			Expect(cf.Cf("create-service", "p-identity", "uaa", ssoServiceName).Wait(testConfig.GetServiceCreateTimeout())).To(Exit(0))
+			Expect(cf.Cf("create-service", "p-identity", testConfig.GetSSOPlan(), ssoServiceName).Wait(testConfig.GetServiceCreateTimeout())).To(Exit(0))
 			// Push the app
 			//Expect(cf.Cf("push", appName, "-p", smoke.SimpleDotnetAppBitsPath, "-d", testConfig.AppsDomain, "-s", testConfig.GetWindowsStack(), "-b", "hwc_buildpack").Wait(testConfig.GetPushTimeout())).To(Exit(0))
-			//runPushTests(appName, appURL, "SSO rocks!", expectedNullResponse, testConfig)
+			//runPushTests(appName, appURL, "auth_time", expectedNullResponse, testConfig)
 		})
 	})
 })
@@ -137,13 +152,6 @@ func runPushTests(appName, appURL, serviceName, expectedResponse, expectedNullRe
 	Eventually(func() (string, error) {
 		return getBodySkipSSL(testConfig.SkipSSLValidation, appURL)
 	}, testConfig.GetDefaultTimeout()).Should(ContainSubstring(expectedResponse))
-
-	instances := 2
-	maxAttempts := 120
-
-	ExpectAllAppInstancesToStart(appName, instances, maxAttempts, testConfig.GetAppStatusTimeout())
-
-	ExpectAllAppInstancesToBeReachable(appURL, instances, maxAttempts)
 
 	if testConfig.Cleanup {
 		Expect(cf.Cf("delete", appName, "-f", "-r").Wait(testConfig.GetDefaultTimeout())).To(Exit(0))
@@ -156,10 +164,6 @@ func runPushTests(appName, appURL, serviceName, expectedResponse, expectedNullRe
 			Expect(cf.Cf("delete-service", serviceName, "-f").Wait(testConfig.GetDefaultTimeout())).To(Exit(0))
 		}
 	}
-}
-
-func ExpectAppToScale(appName string, instances int, timeout time.Duration) {
-	Expect(cf.Cf("scale", appName, "-i", strconv.Itoa(instances)).Wait(timeout)).To(Exit(0))
 }
 
 // Gets app status (up to maxAttempts) until all instances are up
@@ -196,43 +200,6 @@ func ExpectAllAppInstancesToStart(appName string, instances int, maxAttempts int
 	}
 
 	Expect(found).To(BeTrue(), fmt.Sprintf("Wanted to see '%s' (all instances running) in %d attempts, but didn't", expectedOutput, maxAttempts))
-}
-
-// Curls the appURL (up to maxAttempts) until all instances have been seen
-func ExpectAllAppInstancesToBeReachable(appURL string, instances int, maxAttempts int) {
-	matcher := regexp.MustCompile(`instance[ _]index["]{0,1}:[ ]{0,1}(\d+)`)
-
-	branchesSeen := make([]bool, instances)
-	var sawAll bool
-	var testConfig = smoke.GetConfig()
-	for i := 0; i < maxAttempts; i++ {
-		var output string
-		Eventually(func() error {
-			var err error
-			output, err = getBodySkipSSL(testConfig.SkipSSLValidation, appURL)
-			return err
-		}, testConfig.GetDefaultTimeout()).Should(BeNil())
-
-		matches := matcher.FindStringSubmatch(output)
-		if matches == nil {
-			Fail("Expected app curl output to include an instance_index; got " + output)
-		}
-		indexString := matches[1]
-		index, err := strconv.Atoi(indexString)
-		if err != nil {
-			Fail("Failed to parse instance index value " + indexString)
-		}
-		branchesSeen[index] = true
-
-		if allTrue(branchesSeen) {
-			sawAll = true
-			break
-		}
-
-		time.Sleep(time.Duration(5000/maxAttempts) * time.Millisecond)
-	}
-
-	Expect(sawAll).To(BeTrue(), fmt.Sprintf("Expected to hit all %d app instances in %d attempts, but didn't", instances, maxAttempts))
 }
 
 func allTrue(bools []bool) bool {

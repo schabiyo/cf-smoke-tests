@@ -1,5 +1,8 @@
 integration_config.json
 .idea
 smoke.test
+.vscode/
 results
 vendor/**/*_test.go
+assets/**/scc.json
+assets/java_scc/scc.json

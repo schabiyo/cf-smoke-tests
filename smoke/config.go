@@ -24,11 +24,13 @@ type Config struct {
 	Org   string `json:"org"`
 	Space string `json:"space"`
 
-	EnableSSOTests      bool   `json:"enable_sso_tests"`
-	EnableSCCTests      bool   `json:"enable_scc_tests"`
-	GitUri              string `json:"scc_git_uri"`
-	GitBranch           string `json:"scc_git_branch"`
-	EnableAzureSQLTests bool   `json:"enable_azuresql_tests"`
+	EnableSSOAuthCodeTests   bool   `json:"enable_sso_authcode_tests"`
+	EnableSSOClientCredTests bool   `json:"enable_sso_clientcred_tests"`
+	SSOPlan                  string `json:"sso_plan"`
+	EnableSCCTests           bool   `json:"enable_scc_tests"`
+	GitUri                   string `json:"scc_git_uri"`
+	GitBranch                string `json:"scc_git_branch"`
+	EnableAzureSQLTests      bool   `json:"enable_azuresql_tests"`
 
 	UseExistingOrg   bool `json:"use_existing_org"`
 	UseExistingSpace bool `json:"use_existing_space"`
@@ -192,12 +194,19 @@ func (c *Config) GetGitUri() string {
 func (c *Config) GetGitBranch() string {
 	return c.GitBranch
 }
+func (c *Config) GetSSOPlan() string {
+	return c.SSOPlan
+}
 func (c *Config) GetServiceCreateTimeout() time.Duration {
 	return 600 * time.Second
 }
 
-func (c *Config) GetEnableSSOTests() bool {
-	return c.EnableSSOTests
+func (c *Config) GetEnableSSOAuthCodeTests() bool {
+	return c.EnableSSOAuthCodeTests
+}
+
+func (c *Config) GetEnableSSOClientCredTests() bool {
+	return c.EnableSSOClientCredTests
 }
 
 func (c *Config) GetEnableAzureDBTests() bool {

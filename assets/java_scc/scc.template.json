@@ -1,0 +1,7 @@
+{
+    "git": {
+      "label": "master",
+      "uri": "ssh://git@git.platform.io:2222/chabisa/configs.git",
+      "privateKey": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIB=\n-----END RSA PRIVATE KEY-----"
+    }
+}
