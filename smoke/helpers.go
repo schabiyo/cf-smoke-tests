@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	SimpleRubyAppBitsPath   = "../../assets/ruby_simple"
-	SimpleDotnetAppBitsPath = "../../assets/dotnet_simple/Published"
-	MssqlDotnetAppBitsPath  = "../../assets/dotnet_mssql/Published"
-	SCCJavaAppBitsPath      = "../../assets/java_scc"
-	SSOJavaAppBitsPath      = "../../assets/java_sso"
-	SimpleJavaAppBitsPath   = "../../assets/java_simple"
+	SimpleRubyAppBitsPath     = "../../assets/ruby_simple"
+	SimpleDotnetAppBitsPath   = "../../assets/dotnet_simple/Published"
+	AzureDBlDotnetAppBitsPath = "../../assets/dotnet_sqldb/"
+	SCCJavaAppBitsPath        = "../../assets/java_scc"
+	SSOJavaAppBitsPath        = "../../assets/java_sso"
+	SimpleJavaAppBitsPath     = "../../assets/java_simple"
 )
 
 func SkipIfNotWindows(testConfig *Config) {

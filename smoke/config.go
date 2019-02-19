@@ -27,10 +27,10 @@ type Config struct {
 	EnableSSOAuthCodeTests   bool   `json:"enable_sso_authcode_tests"`
 	EnableSSOClientCredTests bool   `json:"enable_sso_clientcred_tests"`
 	SSOPlan                  string `json:"sso_plan"`
+	SSOIdentityProvider      string `json:"sso_identity_provider"`
 	EnableSCCTests           bool   `json:"enable_scc_tests"`
-	GitUri                   string `json:"scc_git_uri"`
-	GitBranch                string `json:"scc_git_branch"`
 	EnableAzureSQLTests      bool   `json:"enable_azuresql_tests"`
+	AzureDBConfigFilename    string `json:"azuresql_config_filename"`
 
 	UseExistingOrg   bool `json:"use_existing_org"`
 	UseExistingSpace bool `json:"use_existing_space"`
@@ -187,16 +187,14 @@ func (c *Config) GetWindowsStack() string {
 	return c.WindowsStack
 }
 
-func (c *Config) GetGitUri() string {
-	return c.GitUri
-}
-
-func (c *Config) GetGitBranch() string {
-	return c.GitBranch
-}
 func (c *Config) GetSSOPlan() string {
 	return c.SSOPlan
 }
+
+func (c *Config) GetSSOIdentityProvider() string {
+	return c.SSOIdentityProvider
+}
+
 func (c *Config) GetServiceCreateTimeout() time.Duration {
 	return 600 * time.Second
 }
@@ -211,6 +209,10 @@ func (c *Config) GetEnableSSOClientCredTests() bool {
 
 func (c *Config) GetEnableAzureDBTests() bool {
 	return c.EnableAzureSQLTests
+}
+
+func (c *Config) GetAzureDBConfigFilename() string {
+	return c.AzureDBConfigFilename
 }
 
 func (c *Config) GetEnableSCCTests() bool {

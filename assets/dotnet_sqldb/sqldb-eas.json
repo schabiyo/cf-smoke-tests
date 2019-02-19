@@ -1,5 +1,5 @@
 {
-    "sqlServerName": "sqlservera",
+    "sqlServerName": "azugessqlprodeas",
     "sqldbName": "generated-string",
     "transparentDataEncryption": true,
     "sqlServerParameters": {
